@@ -1,5 +1,5 @@
-将Source Insight打造成好用的编辑器
-[参考](http://www.armbbs.cn/forum.php?mod=viewthread&tid=95564&extra=page%3D1)
+#将Source Insight打造成好用的编辑器
+>[参考](http://www.armbbs.cn/forum.php?mod=viewthread&tid=95564&extra=page%3D1)
 http://www.armbbs.cn/forum.php?mod=viewthread&tid=95564&extra=page%3D1
 #一、比较冷门的小技巧
 ##1.列选
