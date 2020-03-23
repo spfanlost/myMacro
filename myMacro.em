@@ -527,12 +527,19 @@ macro SearchForWrd()
     /* 调用系统搜索命令 */
     Search_Forward
 }
-
+///< 向下搜索&#&，并选中。
+macro SearchForCurrent()
+{
+    hbuf = GetCurrentBuf()
+    str = GetBufSelText(hbuf)
+    LoadSearchPattern(str, 0, 0, 0);
+    /* 调用系统搜索命令 */
+    Search_Forward
+}
 ///< 将一行中鼠标选中部分注释掉
 macro CommentSelStr()
 {
     hbuf = GetCurrentBuf()
-    ln = GetBufLnCur(hbuf)
     str = GetBufSelText(hbuf)
     str = cat("/*",str)
     str = cat(str,"*/")
@@ -548,7 +555,17 @@ macro CommentSingleLine()
     str = cat(str,"*/")
     PutBufLine (hbuf, ln, str)
 }
-
+///< 修改注册表中的作者名
+macro changeAuthor()
+{
+    szAuthor = ask("pls input your name:")
+    if (strlen(szAuthor) == 0)
+    {
+        beep()
+        stop
+    }
+    setreg(MYNAME, szAuthor)
+}
 ///< 快速注释或者消除注释，选中区域的首行到尾行，不用全部选中。
 macro quickAnnotate()
 {
@@ -614,6 +631,7 @@ macro quickAnnotate()
 macro AddMacroComment()
 {
     hwnd = GetCurrentWnd()
+    WndlnCnt = GetWndLineCount(hwnd)
     sel = GetWndSel(hwnd)
     lnFirst = GetWndSelLnFirst(hwnd)
     lnLast = GetWndSelLnLast(hwnd)
@@ -622,6 +640,8 @@ macro AddMacroComment()
         szIfStart = ""
     else 
         szIfStart = GetBufLine(hbuf, LnFirst-1)
+    if(WndlnCnt == (sel.lnLast+1))
+        InsBufLine(hbuf, lnLast+1, "")
     szIfEnd = GetBufLine(hbuf, lnLast+1)
     if (szIfStart == "#if 0" && szIfEnd == "#endif")
     {
@@ -728,13 +748,18 @@ macro createFileHeader()
         szMonth = "0@Month@" 
     else 
         szMonth = Month
-
-    szAuthor = "meng_yu"
-    szCopyright = "Copyright (c) @Year@, meng_yu imyumeng\@qq.com" 
+    szAuthor = getreg(MYNAME)
+    //szAuthor = "meng_yu"
+    if (strlen(szAuthor) == 0)
+    {
+        szAuthor = ask("first time use,pls input your name:")
+        setreg(MYNAME, szAuthor)
+    }
+    szCopyright = "Copyright (c) @Year@ Maxio Technology (Hangzhou) Ltd. All rigthts reserved."
     InsBufLine(hBuf, 0, "/**")
     InsBufLine(hBuf, 1, " * \@file    @szFileName@")
     InsBufLine(hBuf, 2, " * \@author  @szAuthor@")
-    InsBufLine(hBuf, 3, " * \@brief   &#& function realize")
+    InsBufLine(hBuf, 3, "")
     InsBufLine(hBuf, 4, " * \@version 0.0.1")
     InsBufLine(hBuf, 5, " * \@date    @Year@-@szMonth@-@szDay@")
     InsBufLine(hBuf, 6, " * ")
@@ -742,8 +767,21 @@ macro createFileHeader()
     InsBufLine(hBuf, 8, " */")
     InsBufLine(hBuf, 9, "")
     szFileType = _getFileType(szFileName)
-    if (szFileType == "h" || szFileType == "H")
+    if (szFileType == "c" || szFileType == "C")
     {
+        PutBufLine(hbuf,  3, " * \@brief   &#& function realize")
+        InsBufLine(hBuf, 10, "/* Includes ------------------------------------------------------------------*/")
+        InsBufLine(hBuf, 11, "/* Private declaration -------------------------------------------------------*/")
+        InsBufLine(hBuf, 12, "/* Extern variables declaration ----------------------------------------------*/")
+        InsBufLine(hBuf, 13, "/* Global variables definition -----------------------------------------------*/")
+        InsBufLine(hBuf, 14, "/* Local functions declaration -----------------------------------------------*/")
+        InsBufLine(hBuf, 15, "/* Local functions definition ------------------------------------------------*/")
+        InsBufLine(hBuf, 18, "")
+        InsBufLine(hBuf, 19, "")
+    }
+    else if (szFileType == "h" || szFileType == "H")
+    {
+        PutBufLine(hbuf,  3, " * \@brief   &#& function header file")
         szHeaderMacro = _hfileNameToMacro(szFileName)
         InsBufLine(hBuf, 10, "#ifndef @szHeaderMacro@")
         InsBufLine(hBuf, 11, "#define @szHeaderMacro@")
@@ -757,17 +795,6 @@ macro createFileHeader()
         InsBufLine(hBuf, 19, "")
         InsBufLine(hBuf, 20, "#endif /* @szHeaderMacro@ */")
         InsBufLine(hBuf, 21, "")
-    }
-    else if (szFileType == "c" || szFileType == "C")
-    {
-        InsBufLine(hBuf, 10, "/* Includes ------------------------------------------------------------------*/")
-        InsBufLine(hBuf, 11, "/* Private declaration -------------------------------------------------------*/")
-        InsBufLine(hBuf, 12, "/* Extern variables declaration ----------------------------------------------*/")
-        InsBufLine(hBuf, 13, "/* Global variables definition -----------------------------------------------*/")
-        InsBufLine(hBuf, 14, "/* Local functions declaration -----------------------------------------------*/")
-        InsBufLine(hBuf, 15, "/* Local functions definition ------------------------------------------------*/")
-        InsBufLine(hBuf, 18, "")
-        InsBufLine(hBuf, 19, "")
     }
     SetBufIns(hBuf, 0, 0)
     SearchForWrd()
