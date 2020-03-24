@@ -631,16 +631,17 @@ macro quickAnnotate()
 macro AddMacroComment()
 {
     hwnd = GetCurrentWnd()
-    WndlnCnt = GetWndLineCount(hwnd)
     sel = GetWndSel(hwnd)
     lnFirst = GetWndSelLnFirst(hwnd)
     lnLast = GetWndSelLnLast(hwnd)
-    hbuf = GetCurrentBuf() 
+    hbuf = GetCurrentBuf()
+    BuflnCnt = GetBufLineCount(hbuf)
     if (LnFirst == 0)
         szIfStart = ""
     else 
         szIfStart = GetBufLine(hbuf, LnFirst-1)
-    if(WndlnCnt == (sel.lnLast+1))
+    //msg("WndlnCnt="#WndlnCnt# "sel.lnLast+1="#(sel.lnLast+1)# "lnLast+1="#(lnLast+1)#)
+    if(BuflnCnt == (sel.lnLast+1))
         InsBufLine(hbuf, lnLast+1, "")
     szIfEnd = GetBufLine(hbuf, lnLast+1)
     if (szIfStart == "#if 0" && szIfEnd == "#endif")
@@ -749,13 +750,13 @@ macro createFileHeader()
     else 
         szMonth = Month
     szAuthor = getreg(MYNAME)
-    //szAuthor = "meng_yu"
     if (strlen(szAuthor) == 0)
     {
         szAuthor = ask("first time use,pls input your name:")
         setreg(MYNAME, szAuthor)
     }
-    szCopyright = "Copyright (c) @Year@ Maxio Technology (Hangzhou) Ltd. All rigthts reserved."
+    //szCopyright = "xxx Ltd."
+    szCopyright = "imyumeng\@qq.com"
     InsBufLine(hBuf, 0, "/**")
     InsBufLine(hBuf, 1, " * \@file    @szFileName@")
     InsBufLine(hBuf, 2, " * \@author  @szAuthor@")
@@ -763,7 +764,7 @@ macro createFileHeader()
     InsBufLine(hBuf, 4, " * \@version 0.0.1")
     InsBufLine(hBuf, 5, " * \@date    @Year@-@szMonth@-@szDay@")
     InsBufLine(hBuf, 6, " * ")
-    InsBufLine(hBuf, 7, " * \@copyright @szCopyright@")
+    InsBufLine(hBuf, 7, " * \@copyright Copyright (c) @Year@ @szCopyright@ All rigthts reserved.")
     InsBufLine(hBuf, 8, " */")
     InsBufLine(hBuf, 9, "")
     szFileType = _getFileType(szFileName)
