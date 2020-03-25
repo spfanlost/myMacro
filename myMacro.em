@@ -777,8 +777,8 @@ macro createFileHeader()
         InsBufLine(hBuf, 13, "/* Global variables definition -----------------------------------------------*/")
         InsBufLine(hBuf, 14, "/* Local functions declaration -----------------------------------------------*/")
         InsBufLine(hBuf, 15, "/* Local functions definition ------------------------------------------------*/")
-        InsBufLine(hBuf, 18, "")
-        InsBufLine(hBuf, 19, "")
+        InsBufLine(hBuf, 16, "")
+        InsBufLine(hBuf, 17, "")
     }
     else if (szFileType == "h" || szFileType == "H")
     {
