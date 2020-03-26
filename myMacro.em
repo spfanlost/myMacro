@@ -478,7 +478,8 @@ function _getOneParaName(szParaStr, iCnt)
 function _getFuncPara(hSyml, hBuf)
 {
     iCnt = hSyml.lnName
-    iMax = hSyml.lnLim - 1
+    //iMax = hSyml.lnLim - 1 
+	iMax = hSyml.lnName + 20 //修复超长函数(大约200行)添加头注释导致崩溃的问题。
 
     szLine = GetBufLine(hBuf, iCnt)
     szLine = strmid(szLine, strlen(hSyml.Symbol) + hSyml.ichName, GetBufLineLength(hBuf, iCnt))

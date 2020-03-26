@@ -1,4 +1,4 @@
-# 将Source Insight打造成好用的编辑器
+# 将Source Insight 4 打造成好用的编辑器
 >[参考](http://www.armbbs.cn/forum.php?mod=viewthread&tid=95564&extra=page%3D1)
 http://www.armbbs.cn/forum.php?mod=viewthread&tid=95564&extra=page%3D1
 # 一、比较冷门的小技巧
@@ -13,6 +13,7 @@ Options->>Fail Type Option->>C/C++ source fail，勾选Highlight references to s
 Options->>Fail Type Option->>C/C++ source fail，勾选Visible tabs,Visible spaces,Expand tabs to spaces
 
 # 二、宏
+>Si3无法使用的问题，可能是某些API函数不支持。
 SI的宏很有意思，像C语言语法，可以设置快捷键，提高编程效率。网上有一个Quicker.em宏，比较强大。
 但是很多功能用不到，添加函数头注释要弹窗输入各个参数，我觉得编程时还是尽量少弹窗。
 ## 使用方法
@@ -30,4 +31,7 @@ SI的宏很有意思，像C语言语法，可以设置快捷键，提高编程�
 6. 将CommentSelStr宏，设置Alt+2。// 将一行中鼠标选中部分注释掉
 7. 将CommentSingleLine宏，设置Alt+3。// 把光标显示的行注释掉
 
+# 二、主题
+主题文件添加方法：
+Options->Visual Theme->Manage Visual Themes，Import。选择主题文件，OK。
 
