@@ -690,7 +690,7 @@ macro createFuncHeader()
         szPara_t = _getFuncPara(hSyml, hBuf)    /*!< 再获得参数类型结构体数据 */
         iLine = rSel.lnFirst + 1
         InsBufLine(hBuf,  iLine + 0, "/**")
-        InsBufLine(hBuf,  iLine + 1, " * \@brief  &#&")
+        InsBufLine(hBuf,  iLine + 1, " * \@brief  This function &#&")
         iCnt = 0
         while (iCnt < szPara_t.iParaNum)
         {
@@ -734,7 +734,7 @@ macro createFileHeader()
     hBuf = GetCurrentBuf()
     szFileName = _getFileName(hBuf)
     if (szFileName == "")
-        szFileName = ask("Pls input file name:")
+        szFileName = ask("File name empty, Pls input file name:")
     szTime = GetSysTime(1)
     // Hour = szTime.Hour
     // Minute = szTime.Minute
@@ -753,10 +753,10 @@ macro createFileHeader()
     szAuthor = getreg(MYNAME)
     if (strlen(szAuthor) == 0)
     {
-        szAuthor = ask("first time use,pls input your name:")
+        szAuthor = ask("First time use, Pls input your name:")
         setreg(MYNAME, szAuthor)
     }
-    //szCopyright = "xxx Ltd."
+    //szCopyright = "xxx,Ltd."
     szCopyright = "imyumeng\@qq.com"
     InsBufLine(hBuf, 0, "/**")
     InsBufLine(hBuf, 1, " * \@file    @szFileName@")
