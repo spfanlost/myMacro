@@ -81,28 +81,6 @@ function _hfileNameToMacro(szFileName)
 }
 
 /**
-  * @brief  消除字符串中的线注释“//”
-  * @param  szLine: 字符串
-  * @retval 返回处理过的字符串
-  */
-function _getStrNoLineAnnaotate(szLine)
-{
-    iLen = strlen(szLine)
-    iCnt = 0
-    szStr = szLine
-    while (iCnt < (iLen-1))
-    {
-        if (szStr[iCnt] == "/" && szStr[iCnt+1] == "/")
-        {
-            szStr = strmid(szStr, 0, iCnt-1)
-            return szStr
-        }
-        iCnt++
-    }
-    return szStr
-}
-
-/**
   * @brief  消除字符串中的块注释“/*”
   * @param  szLine: 已经消除了线注释“//”的字符串
   * @retval 返回处理过的字符串
@@ -426,7 +404,6 @@ function _getFuncRetval(hSyml, hBuf)
     while (iCnt < iMax)
     {
         szLine = GetBufLine(hBuf, iCnt)
-        szLine = _getStrNoLineAnnaotate(szLine)
         szLine = cat(szLine, " ")           /*!< 在处理的行后加个空格防止回车导致的单词连在一起*/
         szRetStr = cat(szRetStr, szLine)
         iCnt++
@@ -483,13 +460,11 @@ function _getFuncPara(hSyml, hBuf)
 
     szLine = GetBufLine(hBuf, iCnt)
     szLine = strmid(szLine, strlen(hSyml.Symbol) + hSyml.ichName, GetBufLineLength(hBuf, iCnt))
-    szLine = _getStrNoLineAnnaotate(szLine)
     szParaStr = cat(szLine, " ")
     iCnt++
     while (iCnt <= iMax)
     {
         szLine = GetBufLine(hBuf, iCnt)
-        szLine = _getStrNoLineAnnaotate(szLine)
         szLine = cat(szLine, " ")
         szParaStr = cat(szParaStr, szLine)
         iCnt++
