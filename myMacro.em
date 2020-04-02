@@ -455,20 +455,12 @@ function _getOneParaName(szParaStr, iCnt)
 function _getFuncPara(hSyml, hBuf)
 {
     iCnt = hSyml.lnName
-    //iMax = hSyml.lnLim - 1 
-	iMax = hSyml.lnName + 20 //修复超长函数(大约200行)添加头注释导致崩溃的问题。
-
     szLine = GetBufLine(hBuf, iCnt)
     szLine = strmid(szLine, strlen(hSyml.Symbol) + hSyml.ichName, GetBufLineLength(hBuf, iCnt))
     szParaStr = cat(szLine, " ")
     iCnt++
-    while (iCnt <= iMax)
-    {
-        szLine = GetBufLine(hBuf, iCnt)
-        szLine = cat(szLine, " ")
-        szParaStr = cat(szParaStr, szLine)
-        iCnt++
-    }
+    szLine = GetBufLine(hBuf, iCnt)
+    szParaStr = cat(szParaStr, szLine)
     szParaStr = _getStrNoBlockAnnaotate(szParaStr)
     szParaStr = _getParaStrFromStr(szParaStr, hSyml.Type)
 
@@ -776,3 +768,4 @@ macro createFileHeader()
     SetBufIns(hBuf, 0, 0)
     SearchForWrd()
 }
+
