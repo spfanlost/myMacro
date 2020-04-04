@@ -17,7 +17,7 @@ Options->>Fail Type Option->>C/C++ source fail，勾选Highlight references to s
 Options->>Fail Type Option->>C/C++ source fail，勾选Visible tabs,Visible spaces,Expand tabs to spaces
 
 # 二、宏
->Si3无法使用的问题，可能是某些API函数不支持。
+>Si3无法使用，是某些API函数不支持。
 
 SI的宏很有意思，像C语言语法，可以设置快捷键，提高编程效率。网上有一个Quicker.em宏，比较强大。
 但是很多功能用不到，添加函数头注释要弹窗输入各个参数，我觉得编程时还是尽量少弹窗。
