@@ -80,37 +80,121 @@ function _hfileNameToMacro(szFileName)
     return szFileNameMacro
 }
 
-/**
-  * @brief  消除字符串中的块注释“/*”
-  * @param  szLine: 已经消除了线注释“//”的字符串
-  * @retval 返回处理过的字符串
-  */
-function _getStrNoBlockAnnaotate(szLine)
+function SkipCommentFromString(szLine,isCommentEnd)
 {
-    iLen = strlen(szLine)
-    iCnt = 0
-    szStr = szLine
-    ichFirst = 0
-    ichLast = 0
-    bFlg = FALSE                    /*!< 若查找到"/*"则不用再查找，以防注释是嵌套的 */
-    while (iCnt < (iLen - 1))
+    RetVal = ""
+    fIsEnd = 1
+    nLen = strlen(szLine)
+    nIdx = 0
+    while(nIdx < nLen )
     {
-        if (szStr[iCnt] == "/" && szStr[iCnt + 1] == "*" && bFlg == FALSE)
+        //如果当前行开始还是被注释，或遇到了注释开始的变标记，注释内容改为空格?
+        if( (isCommentEnd == 0) || (szLine[nIdx] == "/" && szLine[nIdx+1] == "*"))
         {
-            ichFirst = iCnt
-            bFlg = TRUE
+            fIsEnd = 0
+            while(nIdx < nLen )
+            {
+                if(szLine[nIdx] == "*" && szLine[nIdx+1] == "/")
+                {
+                    szLine[nIdx+1] = " "
+                    szLine[nIdx] = " " 
+                    nIdx = nIdx + 1 
+                    fIsEnd  = 1
+                    isCommentEnd = 1
+                    break
+                }
+                szLine[nIdx] = " "
+                
+                //如果是倒数第二个则最后一个也肯定是在注释内
+//                if(nIdx == nLen -2 )
+//                {
+//                    szLine[nIdx + 1] = " "
+//                }
+                nIdx = nIdx + 1 
+            }    
+            
+            //如果已经到了行尾终止搜索
+            if(nIdx == nLen)
+            {
+                break
+            }
         }
-        else if (szStr[iCnt] == "*" && szStr[iCnt + 1] == "/" && bFlg == TRUE)
+        
+        //如果遇到的是//来注释的说明后面都为注释
+        if(szLine[nIdx] == "/" && szLine[nIdx+1] == "/")
         {
-            ichLast = iCnt + 2
-            szStr = strmid(szStr, 0, ichFirst) # "" # strmid(szStr, ichLast, iLen)
-            iLen = strlen(szStr)
-            iCnt = ichFirst - 1
-            bFlg = FALSE
+            szLine = strmid(szLine,0,nIdx)
+            break
         }
-        iCnt++
+        nIdx = nIdx + 1                
     }
-    return szStr
+    RetVal.szContent = szLine;
+    RetVal.fIsEnd = fIsEnd
+    return RetVal
+}
+
+function TrimString(szLine)
+{
+    nLen = strlen(szLine)
+    if(nLen == 0)
+    {
+        return szLine
+    }
+    nIdx = 0
+    while( nIdx < nLen )
+    {
+        if( ( szLine[nIdx] != " ") && (szLine[nIdx] != "\t") )
+        {
+            break
+        }
+        nIdx = nIdx + 1
+    }
+    szLine = strmid(szLine,nIdx,nLen)
+    nLen = strlen(szLine)
+    nIdx = nLen
+    while( nIdx > 0 )
+    {
+        nIdx = nIdx - 1
+        if( ( szLine[nIdx] != " ") && (szLine[nIdx] != "\t") )
+        {
+            break
+        }
+    }
+    szLine =  strmid(szLine,0,nIdx+1)
+    return szLine
+}
+
+macro strstr(str1,str2)
+{
+    i = 0
+    j = 0
+    len1 = strlen(str1)
+    len2 = strlen(str2)
+    if((len1 == 0) || (len2 == 0))
+    {
+        return 0xffffffff
+    }
+    while( i < len1)
+    {
+        if(str1[i] == str2[j])
+        {
+            while(j < len2)
+            {
+                j = j + 1
+                if(str1[i+j] != str2[j]) 
+                {
+                    break
+                }
+            }     
+            if(j == len2)
+            {
+                return i
+            }
+            j = 0
+        }
+        i = i + 1      
+    }  
+    return 0xffffffff
 }
 
 // 获得返回的数据类型
@@ -404,13 +488,14 @@ function _getFuncRetval(hSyml, hBuf)
     while (iCnt < iMax)
     {
         szLine = GetBufLine(hBuf, iCnt)
+
         szLine = cat(szLine, " ")           /*!< 在处理的行后加个空格防止回车导致的单词连在一起*/
         szRetStr = cat(szRetStr, szLine)
         iCnt++
     }
     szLine = GetBufLine(hBuf, iMax)
     szRetStr = cat(szRetStr, strmid(szLine, 0, hSyml.ichName))
-    szRetStr = _getStrNoBlockAnnaotate(szRetStr)
+    //add SkipCommentFromString ?
     szRetStr = _getRetvalTypeFromStr(szRetStr)
     return szRetStr
 }
@@ -455,15 +540,27 @@ function _getOneParaName(szParaStr, iCnt)
 function _getFuncPara(hSyml, hBuf)
 {
     iCnt = hSyml.lnName
-    szLine = GetBufLine(hBuf, iCnt)
-    szLine = strmid(szLine, strlen(hSyml.Symbol) + hSyml.ichName, GetBufLineLength(hBuf, iCnt))
-    szParaStr = cat(szLine, " ")
-    iCnt++
-    szLine = GetBufLine(hBuf, iCnt)
-    szParaStr = cat(szParaStr, szLine)
-    szParaStr = _getStrNoBlockAnnaotate(szParaStr)
-    szParaStr = _getParaStrFromStr(szParaStr, hSyml.Type)
-
+    iMax = hSyml.lnLim
+    fIsEnd = 1
+    while (iCnt <= iMax)
+    {
+        szLine = GetBufLine(hBuf, iCnt)
+        //去掉被注释掉的内容
+        RetVal = SkipCommentFromString(szLine,fIsEnd)
+        szLine = RetVal.szContent
+        szLine = TrimString(szLine)
+        fIsEnd = RetVal.fIsEnd
+        //如果是{表示函数参数头结束了
+        ret = strstr(szLine,"{")
+        if(ret != 0xffffffff)
+        {
+            szLine = strmid(szLine,0,ret)
+            szParaStr = cat(szParaStr,szLine)
+            break
+        }
+        szParaStr = cat(szParaStr,szLine)
+        iCnt++
+    }
     /* 从参数字符串中提取出参数名 */
     szPara = ""
     szPara.iParaNum = 0
@@ -474,7 +571,7 @@ function _getFuncPara(hSyml, hBuf)
     cchEnd = 0
     while (iCnt < iLen)
     {
-        if (szParaStr[iCnt] == ",")
+        if ((szParaStr[iCnt] == ",")||(szParaStr[iCnt] == ")"))
         {
             cchEnd = iCnt
             szCut = strmid(szParaStr, cchStart, cchEnd)     /*!< 截取一个参数字符串*/
