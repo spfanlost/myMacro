@@ -133,7 +133,7 @@ function SkipCommentFromString(szLine,isCommentEnd)
     return RetVal
 }
 
-function TrimString(szLine)
+macro TrimLeft(szLine)
 {
     nLen = strlen(szLine)
     if(nLen == 0)
@@ -149,8 +149,16 @@ function TrimString(szLine)
         }
         nIdx = nIdx + 1
     }
-    szLine = strmid(szLine,nIdx,nLen)
+    return strmid(szLine,nIdx,nLen)
+}
+
+macro TrimRight(szLine)
+{
     nLen = strlen(szLine)
+    if(nLen == 0)
+    {
+        return szLine
+    }
     nIdx = nLen
     while( nIdx > 0 )
     {
@@ -160,11 +168,16 @@ function TrimString(szLine)
             break
         }
     }
-    szLine =  strmid(szLine,0,nIdx+1)
+    return strmid(szLine,0,nIdx+1)
+}
+function TrimString(szLine)
+{
+    szLine = TrimLeft(szLine)
+    szLine = TrimRight(szLine)
     return szLine
 }
 
-macro strstr(str1,str2)
+function strstr(str1,str2)
 {
     i = 0
     j = 0
