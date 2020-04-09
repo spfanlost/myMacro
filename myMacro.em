@@ -133,7 +133,7 @@ function SkipCommentFromString(szLine,isCommentEnd)
     return RetVal
 }
 
-macro TrimLeft(szLine)
+function TrimLeft(szLine)
 {
     nLen = strlen(szLine)
     if(nLen == 0)
@@ -152,7 +152,7 @@ macro TrimLeft(szLine)
     return strmid(szLine,nIdx,nLen)
 }
 
-macro TrimRight(szLine)
+function TrimRight(szLine)
 {
     nLen = strlen(szLine)
     if(nLen == 0)
