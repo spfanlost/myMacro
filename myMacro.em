@@ -6,9 +6,7 @@
   */
 
 /**
-  * @brief  获得文件名，包含后缀
-  * @param  hBuf: 文件缓冲
-  * @retval 文件名字符串
+  * @brief  _getFileName 
   */
 function _getFileName(hBuf)
 {
@@ -30,9 +28,7 @@ function _getFileName(hBuf)
 }
 
 /**
-  * @brief  获得文件后缀
-  * @param  szFileName: 文件名带后缀的
-  * @retval 文件后缀
+  * @brief  _getFileType
   */
 function _getFileType(szFileName)
 {
@@ -52,10 +48,7 @@ function _getFileType(szFileName)
 }
 
 /**
-  * @brief  把头文件名转换成宏，具体规则：
-  *         头部加1个"_",非字母数字转换成"_",小写字母变大写,最后再加1个"_"
-  * @param  szFileName: 文件名带后缀的
-  * @retval 转换后的宏
+  * @brief  _hfileNameToMacro
   */
 function _hfileNameToMacro(szFileName)
 {
@@ -88,7 +81,6 @@ function SkipCommentFromString(szLine,isCommentEnd)
     nIdx = 0
     while(nIdx < nLen )
     {
-        //如果当前行开始还是被注释，或遇到了注释开始的变标记，注释内容改为空格?
         if( (isCommentEnd == 0) || (szLine[nIdx] == "/" && szLine[nIdx+1] == "*"))
         {
             fIsEnd = 0
@@ -104,23 +96,13 @@ function SkipCommentFromString(szLine,isCommentEnd)
                     break
                 }
                 szLine[nIdx] = " "
-                
-                //如果是倒数第二个则最后一个也肯定是在注释内
-//                if(nIdx == nLen -2 )
-//                {
-//                    szLine[nIdx + 1] = " "
-//                }
                 nIdx = nIdx + 1 
             }    
-            
-            //如果已经到了行尾终止搜索
             if(nIdx == nLen)
             {
                 break
             }
         }
-        
-        //如果遇到的是//来注释的说明后面都为注释
         if(szLine[nIdx] == "/" && szLine[nIdx+1] == "/")
         {
             szLine = strmid(szLine,0,nIdx)
@@ -210,7 +192,6 @@ function strstr(str1,str2)
     return 0xffffffff
 }
 
-// 获得返回的数据类型
 function _getRetvalTypeFromStr(szRetStr)
 {
     chTab = CharFromAscii(9)
@@ -248,13 +229,6 @@ function _getRetvalTypeFromStr(szRetStr)
     return szStr
 }
 
-
-/**
-  * @brief  把字符串中开始的“()”参数截取出来
-  * @param  szParaStr: 整个函数的字符串
-  * @param  szSymlType: 字符串是函数还是函数声明
-  * @retval 返回处理过的字符串，出错返回空
-  */
 function _getParaStrFromStr(szParaStr, szSymlType)
 {
     iLen = strlen(szParaStr)
@@ -282,12 +256,11 @@ function _getParaStrFromStr(szParaStr, szSymlType)
         }
         iCnt++
     }
-    if (bFlg == FALSE)                  /*!< 没找到开头，没找到结尾在下一条if会处理 */
+    if (bFlg == FALSE)
         return ""
-    if (cchEnd - cchStart <= 1)             /*!< 这种情况应该不会出现 */
+    if (cchEnd - cchStart <= 1)
         return ""
     szResult = strmid(szParaStr, cchStart, cchEnd)
-    // 去掉最前面的"("和最后面的")"
     iCnt = 0
     iLen = strlen(szResult)
     cchStart = 0
@@ -314,7 +287,6 @@ function _getParaStrFromStr(szParaStr, szSymlType)
     if (cchStart >= cchEnd)
         return ","
     szResult = strmid(szResult, cchStart, cchEnd)
-    /* 从后往前再扫描这个字符串，如果遇见的第一个非空字符是","属于最后一个参数的，删掉 */
     chTab = CharFromAscii(9)
     chSpace = CharFromAscii(32);
     iLen = strlen(szResult)
@@ -338,18 +310,11 @@ function _getParaStrFromStr(szParaStr, szSymlType)
     return szResult
 }
 
-/**
-  * @brief  传入一个表达式，内包含一个参数，提取出来，参数名后加一个"#"
-  * @param  szCut: 表达式
-  * @retval 返回参数名，无则返回void
-  */
 function _getParaNameFromStr(szCut)
 {
     iLen = strlen(szCut)
-    /* 如果没有参数，则返回void# */
     if (iLen == 0)
         return "void#"
-    /* 去除右侧的空格 */
     chTab = CharFromAscii(9)
     chSpace = CharFromAscii(32);
     iCnt = iLen - 1
@@ -365,12 +330,10 @@ function _getParaNameFromStr(szCut)
             break
         }
     }
-    /* 如果参数是数组或者函数指针，比较复杂，单独处理*/
     iLen = strlen(szCut)
     szParaName = ""
     if (szCut[iLen - 1] == ")")
     {
-        /* 从左往右找到的第一个"()"就包含参数名 */
         iStep = 0
         cchNameEnd = 0
         cchNameStart = 0
@@ -390,14 +353,13 @@ function _getParaNameFromStr(szCut)
             }
             iCnt++
         }
-        if (iStep != 2)                         /*!< 这种情况不会出现，除非语法错误 */
+        if (iStep != 2)
         {
             return "error#"
         }
         else
         {
             szParaName = strmid(szCut, cchNameStart, cchNameEnd + 1)
-            /* 查找到单词 */
             bFlg = FALSE
             iLen = strlen(szParaName)
             iCnt = iLen - 1
@@ -428,11 +390,10 @@ function _getParaNameFromStr(szCut)
     }
     else if (szCut[iLen - 1] == "]")
     {
-        iStep = 0                           /*!< 0 找"[", 1 找非空字符，2找单词结束*/
+        iStep = 0
         cchNameEnd = 0
         cchNameStart = 0
         iCnt = iLen - 1
-        /* 先找到“[”，再找到前面第一个单词就是数组名 */
         while (iCnt >= 0)
         {
             if ((szCut[iCnt] == "[") && (iStep == 0))
@@ -452,7 +413,7 @@ function _getParaNameFromStr(szCut)
             }
             iCnt--
         }
-        if (iStep != 2)                 /*!< 这种情况不会出现，除非语法错误 */
+        if (iStep != 2)
         {
             return "error#"
         }
@@ -476,7 +437,7 @@ function _getParaNameFromStr(szCut)
             }
             iCnt--
         }
-        if (iCnt == -1)                 /*!< 这种情况不会出现，除非语法错误 */
+        if (iCnt == -1)
         {
             szParaName = szCut
             szParaName = cat(szParaName, "#")
@@ -486,12 +447,6 @@ function _getParaNameFromStr(szCut)
     return "void#"
 }
 
-/**
-  * @brief  获得函数返回值类型
-  * @param  hSyml: 函数的SymbolRecord
-  * @param  hBuf: 文件缓冲
-  * @retval 返回值类型字符串或者空
-  */
 function _getFuncRetval(hSyml, hBuf)
 {
     iCnt = hSyml.lnFirst
@@ -502,7 +457,7 @@ function _getFuncRetval(hSyml, hBuf)
     {
         szLine = GetBufLine(hBuf, iCnt)
 
-        szLine = cat(szLine, " ")           /*!< 在处理的行后加个空格防止回车导致的单词连在一起*/
+        szLine = cat(szLine, " ")
         szRetStr = cat(szRetStr, szLine)
         iCnt++
     }
@@ -512,12 +467,7 @@ function _getFuncRetval(hSyml, hBuf)
     szRetStr = _getRetvalTypeFromStr(szRetStr)
     return szRetStr
 }
-/**
-  * @brief  从参数字符串分离出一个参数
-  * @param  szParaStr: 参数字符串
-  * @param  iCnt: 第几个参数 0 开始索引
-  * @retval 返回参数名
-  */
+
 function _getOneParaName(szParaStr, iCnt)
 {
     iLen = strlen(szParaStr)
@@ -544,12 +494,6 @@ function _getOneParaName(szParaStr, iCnt)
     return "void"
 }
 
-/**
-  * @brief  获得函数参数
-  * @param  hSyml: 函数的SymbolRecord
-  * @param  hBuf: 文件缓冲
-  * @retval 返回值类型字符串或者空
-  */
 function _getFuncPara(hSyml, hBuf)
 {
     iCnt = hSyml.lnName
@@ -558,12 +502,10 @@ function _getFuncPara(hSyml, hBuf)
     while (iCnt <= iMax)
     {
         szLine = GetBufLine(hBuf, iCnt)
-        //去掉被注释掉的内容
         RetVal = SkipCommentFromString(szLine,fIsEnd)
         szLine = RetVal.szContent
         szLine = TrimString(szLine)
         fIsEnd = RetVal.fIsEnd
-        //如果是{表示函数参数头结束了
         ret = strstr(szLine,"{")
         if(ret != 0xffffffff)
         {
@@ -574,7 +516,6 @@ function _getFuncPara(hSyml, hBuf)
         szParaStr = cat(szParaStr,szLine)
         iCnt++
     }
-    /* 从参数字符串中提取出参数名 */
     szPara = ""
     szPara.iParaNum = 0
     szPara.szParaStr = ""
@@ -598,14 +539,11 @@ function _getFuncPara(hSyml, hBuf)
     return szPara
 }
 
-///< 向下搜索&#&，并选中。
 macro SearchForWrd()
 {
     LoadSearchPattern("&#&", 0, 0, 0);
-    /* 调用系统搜索命令 */
     Search_Forward
 }
-///< 向下搜索&#&，并选中。
 macro SearchForCurrent()
 {
     hbuf = GetCurrentBuf()
@@ -614,7 +552,6 @@ macro SearchForCurrent()
     /* 调用系统搜索命令 */
     Search_Forward
 }
-///< 将一行中鼠标选中部分注释掉
 macro CommentSelStr()
 {
     hbuf = GetCurrentBuf()
@@ -623,7 +560,6 @@ macro CommentSelStr()
     str = cat(str,"*/")
     SetBufSelText (hbuf, str)
 }
-///< 把光标显示的行注释掉
 macro CommentSingleLine()
 {
     hbuf = GetCurrentBuf()
@@ -633,7 +569,6 @@ macro CommentSingleLine()
     str = cat(str,"*/")
     PutBufLine (hbuf, ln, str)
 }
-///< 修改注册表中的作者名
 macro changeAuthor()
 {
     szAuthor = ask("pls input your name:")
@@ -644,17 +579,13 @@ macro changeAuthor()
     }
     setreg(MYNAME, szAuthor)
 }
-///< 快速注释或者消除注释，选中区域的首行到尾行，不用全部选中。
 macro quickAnnotate()
 {
-    /* 获得文件句柄 */
     hWnd = GetCurrentWnd()
     if (hWnd == hNil)
         stop
-    /* 获得SelectRecord和文件缓冲句柄*/
     rSel = GetWndSel(hWnd)
     hBuf = GetWndBuf(hWnd)
-    /* 检测是否所有行开头都有“//” */
     bFlg = TRUE
     iLn = rSel.lnFirst
     szLine = ""
@@ -679,7 +610,7 @@ macro quickAnnotate()
             break
         }
     }
-    if (bFlg == TRUE)                           /*!< 消除注释 */
+    if (bFlg == TRUE)
     {
         iLn = rSel.lnFirst
         while (iLn <= rSel.lnLast)
@@ -691,7 +622,7 @@ macro quickAnnotate()
             iLn++
         }
     }
-    else                                    /*!< 增加注释 */
+    else
     {
         iLn = rSel.lnFirst
         while (iLn <= rSel.lnLast)
@@ -705,7 +636,7 @@ macro quickAnnotate()
     //SetBufIns(hBuf, rSel.lnFirst, 0)
     SetWndSel(hWnd, rSel)
 }
-///< 添加宏注释“#ifdef 0”和“#endif”
+
 macro AddMacroComment()
 {
     hwnd = GetCurrentWnd()
@@ -739,16 +670,13 @@ macro AddMacroComment()
     SetWndSel(hwnd, sel)
 }
 
-///< 创建函数注释，可以是声明处，也可以是定义处
 macro createFuncHeader()
 {
-    /* 获得文件句柄、SelectRecord、文件缓冲 */
     hWnd = GetCurrentWnd()
     if (hWnd == hNil)
         stop
     rSel = GetWndSel(hWnd)
     hBuf = GetWndBuf(hWnd)
-    /* 先检查光标下面一行是否存在symbol */
     if (GetBufLineCount(hBuf) <= (rSel.lnFirst + 1))
     {
         beep()
@@ -760,11 +688,10 @@ macro createFuncHeader()
         beep()
         stop
     }
-    /* 再检测symbol类型是不是函数声明或者函数定义 */
     if (hSyml.Type == "Function Prototype" || hSyml.Type == "Function")
     {
-        szRetval = _getFuncRetval(hSyml, hBuf)    /*!< 先获得返回值类型 */
-        szPara_t = _getFuncPara(hSyml, hBuf)    /*!< 再获得参数类型结构体数据 */
+        szRetval = _getFuncRetval(hSyml, hBuf)
+        szPara_t = _getFuncPara(hSyml, hBuf)
         iLine = rSel.lnFirst + 1
         InsBufLine(hBuf,  iLine + 0, "/**")
         InsBufLine(hBuf,  iLine + 1, " * \@brief  This function &#&")
@@ -805,7 +732,6 @@ macro createFuncHeader()
     }
 }
 
-///< 创建文件头注释，自动识别文件类型
 macro createFileHeader()
 {
     hBuf = GetCurrentBuf()
