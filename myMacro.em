@@ -1,5 +1,5 @@
 /**
-  * @brief   some find from internet, for self use.
+  * @brief   find from internet, for self use.
   * @data    2020-03-01
   * @author  meng_yu
   * @copyright imyumeng@qq.com 2020 
