@@ -2,11 +2,11 @@
   * @brief   find from internet, for self use.
   * @data    2020-03-01
   * @author  meng_yu
-  * @copyright imyumeng@qq.com 2020 
+  * @copyright imyumeng@qq.com 2020
   */
 
 /**
-  * @brief  _getFileName 
+  * @brief  _getFileName
   */
 function _getFileName(hBuf)
 {
@@ -89,15 +89,15 @@ function SkipCommentFromString(szLine,isCommentEnd)
                 if(szLine[nIdx] == "*" && szLine[nIdx+1] == "/")
                 {
                     szLine[nIdx+1] = " "
-                    szLine[nIdx] = " " 
-                    nIdx = nIdx + 1 
+                    szLine[nIdx] = " "
+                    nIdx = nIdx + 1
                     fIsEnd  = 1
                     isCommentEnd = 1
                     break
                 }
                 szLine[nIdx] = " "
-                nIdx = nIdx + 1 
-            }    
+                nIdx = nIdx + 1
+            }
             if(nIdx == nLen)
             {
                 break
@@ -108,7 +108,7 @@ function SkipCommentFromString(szLine,isCommentEnd)
             szLine = strmid(szLine,0,nIdx)
             break
         }
-        nIdx = nIdx + 1                
+        nIdx = nIdx + 1
     }
     RetVal.szContent = szLine;
     RetVal.fIsEnd = fIsEnd
@@ -176,19 +176,19 @@ function strstr(str1,str2)
             while(j < len2)
             {
                 j = j + 1
-                if(str1[i+j] != str2[j]) 
+                if(str1[i+j] != str2[j])
                 {
                     break
                 }
-            }     
+            }
             if(j == len2)
             {
                 return i
             }
             j = 0
         }
-        i = i + 1      
-    }  
+        i = i + 1
+    }
     return 0xffffffff
 }
 
@@ -306,7 +306,7 @@ function _getParaStrFromStr(szParaStr, szSymlType)
         }
     }
     if (iCnt == -1)
-        szResult = ","  
+        szResult = ","
     return szResult
 }
 
@@ -581,60 +581,121 @@ macro changeAuthor()
 }
 macro quickAnnotate()
 {
-    hWnd = GetCurrentWnd()
-    if (hWnd == hNil)
-        stop
-    rSel = GetWndSel(hWnd)
-    hBuf = GetWndBuf(hWnd)
-    bFlg = TRUE
-    iLn = rSel.lnFirst
-    szLine = ""
-    while (iLn <= rSel.lnLast)
+    /* 获取选择区收尾行 */
+    handle = GetCurrentWnd()
+    first_line = GetWndSelLnFirst(handle)
+    last_line = GetWndSelLnLast(handle)
+
+    /* 获取当前打开文件文本 */
+    file_txt = GetCurrentBuf()
+
+    if(GetBufLine(file_txt, 0)=="//magic-number:tph85666031")
     {
-        szLine = GetBufLine(hBuf, iLn)
-        if (strlen(szLine) >= 2)
+        stop
+    }
+
+    /* 决定最小非空格字符开始列数 */
+    process_line = first_line
+    min_process_column = 10000
+
+    while(process_line <= last_line)
+    {
+        process_txt = GetBufLine(file_txt,process_line)
+        process_txt_len = strlen(process_txt)
+
+        if(process_txt == "")
         {
-            if ((szLine[0] == "/") && (szLine[1] == "/"))
+            process_line = process_line + 1
+            continue
+        }
+
+        /* 查找非空格字符开始列数 */
+        process_column = 0;
+
+        while(process_column < process_txt_len)
+        {
+            if( process_txt[process_column] != " ")
             {
-                iLn++
+                break
+            }
+            process_column = process_column + 1
+        }
+
+        if(process_column < min_process_column)
+        {
+            min_process_column = process_column
+        }
+
+        process_line = process_line + 1
+    }
+
+    /* 逐行处理文本 */
+    process_line = first_line
+
+    while(process_line <= last_line)
+    {
+        process_txt = GetBufLine(file_txt,process_line)
+        process_txt_len = strlen(process_txt)
+
+        if(process_txt == "")
+        {
+            process_line = process_line + 1
+            continue
+        }
+
+        /* 查找非空格字符开始列 */
+        process_column = 0;
+
+        while(process_column < process_txt_len)
+        {
+            if( process_txt[process_column] != " ")
+            {
+                break
+            }
+            process_column = process_column + 1
+        }
+
+        var buffer
+
+        if(process_column < process_txt_len)
+        {
+            if(process_txt[process_column] == "/" && process_txt[process_column + 1] == "/")
+            {
+                /* 取消注释 补全缩进         */
+                space = 0
+                while(space < process_column)
+                {
+                    space = space + 1
+                    buffer = cat(buffer," ");
+                }
+
+                space = 2
+                if(process_txt[process_column + 2] == " ")
+                {
+                    space = 3
+                }
+
+                buffer = cat(buffer,strmid(process_txt,process_column + space,strlen(process_txt)))
+                PutBufLine(handle,process_line,buffer)
             }
             else
             {
-                bFlg = FALSE
-                break
+                /* 增加注释 补全缩进         */
+                space = 0
+                while(space < min_process_column)
+                {
+                    space = space + 1
+                    buffer = cat(buffer," ");
+                }
+
+                buffer = cat(buffer,"// ")
+                buffer = cat(buffer,strmid(process_txt, min_process_column, strlen(process_txt)))
+                PutBufLine(handle,process_line,buffer)
             }
         }
-        else
-        {
-            bFlg = FALSE
-            break
-        }
+
+        process_line = process_line + 1
     }
-    if (bFlg == TRUE)
-    {
-        iLn = rSel.lnFirst
-        while (iLn <= rSel.lnLast)
-        {
-            szline = GetBufLine(hBuf, iLn)
-            iLen = GetBufLineLength(hBuf, iLn)
-            szLine = strmid(szLine, 2, iLen)
-            PutBufLine(hBuf, iLn, szLine)
-            iLn++
-        }
-    }
-    else
-    {
-        iLn = rSel.lnFirst
-        while (iLn <= rSel.lnLast)
-        {
-            szLine = GetBufLine(hBuf, iLn)
-            szLine = cat("//", szLine)
-            PutBufLine(hBuf, iLn, szLine)
-            iLn++
-        }
-    }
-    //SetBufIns(hBuf, rSel.lnFirst, 0)
-    SetWndSel(hWnd, rSel)
 }
 
 macro AddMacroComment()
@@ -647,7 +708,7 @@ macro AddMacroComment()
     BuflnCnt = GetBufLineCount(hbuf)
     if (LnFirst == 0)
         szIfStart = ""
-    else 
+    else
         szIfStart = GetBufLine(hbuf, LnFirst-1)
     //msg("WndlnCnt="#WndlnCnt# "sel.lnLast+1="#(sel.lnLast+1)# "lnLast+1="#(lnLast+1)#)
     if(BuflnCnt == (sel.lnLast+1))
@@ -657,16 +718,16 @@ macro AddMacroComment()
     {
         DelBufLine(hbuf, lnLast+1)
         DelBufLine(hbuf, lnFirst-1)
-        sel.lnFirst = sel.lnFirst-1 
+        sel.lnFirst = sel.lnFirst-1
         sel.lnLast = sel.lnLast-1
     }
     else
     {
         InsBufLine(hbuf, lnFirst, "#if 0")
         InsBufLine(hbuf, lnLast+2, "#endif")
-        sel.lnFirst = sel.lnFirst+1 
+        sel.lnFirst = sel.lnFirst+1
         sel.lnLast = sel.lnLast+1
-    } 
+    }
     SetWndSel(hwnd, sel)
 }
 
@@ -715,7 +776,7 @@ macro createFuncHeader()
             InsBufLine(hBuf,  iLine + 2 + iCnt, " * \@note:  &#&")
             InsBufLine(hBuf,  iLine + 3 + iCnt, " */")
         }
-        else 
+        else
         {
             InsBufLine(hBuf,  iLine + 2 + iCnt, " * \@return &#&")
             InsBufLine(hBuf,  iLine + 3 + iCnt, " * \@retval &#&")
@@ -744,14 +805,14 @@ macro createFileHeader()
     // Second = szTime.Second
     Day = szTime.Day
     Month = szTime.Month
-    Year = szTime.Year 
-    if (Day < 10) 
-        szDay = "0@Day@" 
-    else 
+    Year = szTime.Year
+    if (Day < 10)
+        szDay = "0@Day@"
+    else
         szDay = Day
-    if (Month < 10) 
-        szMonth = "0@Month@" 
-    else 
+    if (Month < 10)
+        szMonth = "0@Month@"
+    else
         szMonth = Month
     szAuthor = getreg(MYNAME)
     if (strlen(szAuthor) == 0)
