@@ -8,7 +8,7 @@
 /**
   * @brief  _getFileName
   */
-function _getFileName(hBuf)
+macro _getFileName(hBuf)
 {
     szFileName = GetBufName(hBuf)
     iLen = strlen(szFileName)
@@ -30,7 +30,7 @@ function _getFileName(hBuf)
 /**
   * @brief  _getFileType
   */
-function _getFileType(szFileName)
+macro _getFileType(szFileName)
 {
     szFileNameExt = ""
     iLen = strlen(szFileName)
@@ -50,7 +50,7 @@ function _getFileType(szFileName)
 /**
   * @brief  _hfileNameToMacro
   */
-function _hfileNameToMacro(szFileName)
+macro _hfileNameToMacro(szFileName)
 {
     szFileNameMacro = szFileName
     iLen = strlen(szFileNameMacro)
@@ -73,7 +73,7 @@ function _hfileNameToMacro(szFileName)
     return szFileNameMacro
 }
 
-function SkipCommentFromString(szLine,isCommentEnd)
+macro SkipCommentFromString(szLine,isCommentEnd)
 {
     RetVal = ""
     fIsEnd = 1
@@ -152,14 +152,14 @@ macro TrimRight(szLine)
     }
     return strmid(szLine,0,nIdx+1)
 }
-function TrimString(szLine)
+macro TrimString(szLine)
 {
     szLine = TrimLeft(szLine)
     szLine = TrimRight(szLine)
     return szLine
 }
 
-function strstr(str1,str2)
+macro strstr(str1,str2)
 {
     i = 0
     j = 0
@@ -192,7 +192,7 @@ function strstr(str1,str2)
     return 0xffffffff
 }
 
-function _getRetvalTypeFromStr(szRetStr)
+macro _getRetvalTypeFromStr(szRetStr)
 {
     chTab = CharFromAscii(9)
     chSpace = CharFromAscii(32);
@@ -229,7 +229,7 @@ function _getRetvalTypeFromStr(szRetStr)
     return szStr
 }
 
-function _getParaStrFromStr(szParaStr, szSymlType)
+macro _getParaStrFromStr(szParaStr, szSymlType)
 {
     iLen = strlen(szParaStr)
     bFlg = FALSE                        /*!< 找到第一个"("标志位 */
@@ -310,7 +310,7 @@ function _getParaStrFromStr(szParaStr, szSymlType)
     return szResult
 }
 
-function _getParaNameFromStr(szCut)
+macro _getParaNameFromStr(szCut)
 {
     iLen = strlen(szCut)
     if (iLen == 0)
@@ -447,7 +447,7 @@ function _getParaNameFromStr(szCut)
     return "void#"
 }
 
-function _getFuncRetval(hSyml, hBuf)
+macro _getFuncRetval(hSyml, hBuf)
 {
     iCnt = hSyml.lnFirst
     iMax = hSyml.lnName
@@ -468,7 +468,7 @@ function _getFuncRetval(hSyml, hBuf)
     return szRetStr
 }
 
-function _getOneParaName(szParaStr, iCnt)
+macro _getOneParaName(szParaStr, iCnt)
 {
     iLen = strlen(szParaStr)
     iIndex = 0
@@ -494,7 +494,7 @@ function _getOneParaName(szParaStr, iCnt)
     return "void"
 }
 
-function _getFuncPara(hSyml, hBuf)
+macro _getFuncPara(hSyml, hBuf)
 {
     iCnt = hSyml.lnName
     iMax = hSyml.lnLim
